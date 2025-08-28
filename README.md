@@ -1,12 +1,11 @@
 # Mediapipe Landmark 3D Viewer(Face)
 
-## **[https://your-website.com](https://your-website.com)**
+### **[Mediapipe Landmark 3D Viewer Link](https://cornpip.github.io/mediapipe_landmark_viewer/)**
 
-Face Mesh (468 points)
+Face Mesh (468 points)  
+각 랜드마크에 번호를 표시하여, 어떤 점이 얼굴의 어떤 부위에 해당하는지 바로 확인할 수 있습니다.
 
-이 뷰어는 각 랜드마크에 번호를 표시하여, 어떤 점이 얼굴의 어떤 부위에 해당하는지 바로 확인할 수 있습니다.
-
-this viewer renders each landmark with its index number, so you can instantly see which point corresponds to which facial featur
+The viewer renders each landmark with its index number, so you can instantly see which point corresponds to which facial featur
 
 ## Usage Guide
 
