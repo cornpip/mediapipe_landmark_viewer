@@ -1,69 +1,33 @@
-# React + TypeScript + Vite
+# Mediapipe Landmark 3D Viewer(Face)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## **[https://your-website.com](https://your-website.com)**
 
-Currently, two official plugins are available:
+Face Mesh (468 points)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+이 뷰어는 각 랜드마크에 번호를 표시하여, 어떤 점이 얼굴의 어떤 부위에 해당하는지 바로 확인할 수 있습니다.
 
-## Expanding the ESLint configuration
+this viewer renders each landmark with its index number, so you can instantly see which point corresponds to which facial featur
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Usage Guide
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+<img src="./readme/4.png" width="600" />
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+0 ~ 467 까지 포인트가 있습니다.  
+키보드로 View를 수평이동 할 수 있습니다.  
+포인트 클릭시 해당 랜드마크 번호를 확인할 수 있습니다.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+There are points from 0 to 467.  
+You can pan the view horizontally using the keyboard.  
+Click a point to see its number.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Example Image
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+<img src="./readme/1.png" width="600" />
+<img src="./readme/2.png" width="600" />
+<img src="./readme/5.png" width="600" />
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Reference
+
+The landmark data used comes from the following JSON source: [link](https://github.com/lschmelzeisen/understanding-mediapipe-facemesh-output/blob/main/output/landmarks.json)
+
+Landmark numbers on a face image: [link](https://storage.googleapis.com/mediapipe-assets/documentation/mediapipe_face_landmark_fullsize.png)

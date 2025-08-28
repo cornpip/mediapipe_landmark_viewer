@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
-import { Canvas, useThree, useFrame } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { Box, TextField, Button } from '@mui/material';
+import { Box, TextField, Button, Typography, Link } from '@mui/material';
 import { Vector3 } from 'three';
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { Text } from '@react-three/drei';
 
 type Landmark = {
     x: number;
@@ -11,32 +12,16 @@ type Landmark = {
     z: number;
 };
 
-// 🟢 랜드마크 점 컴포넌트
-function LandmarkPoints({ highlight, landmarks }: { highlight: number | null; landmarks: Landmark[] }) {
-    return (
-        <group scale={[1, -1, -1]}>
-            {' '}
-            {/* y축 뒤집힘 보정 */}
-            {landmarks.map((p, i) => (
-                <mesh key={i} position={[p.x, p.y, p.z]}>
-                    <sphereGeometry args={[0.01, 8, 8]} />
-                    <meshStandardMaterial color={highlight === i ? 'red' : 'blue'} emissive={highlight === i ? 'red' : 'black'} />
-                </mesh>
-            ))}
-        </group>
-    );
-}
-
 // 🟢 메인 뷰어 컴포넌트
 export default function FaceMeshViewer() {
-    const [index, setIndex] = useState<number | null>(null);
+    const [index, setIndex] = useState<number[]>([]);
     const [input, setInput] = useState('');
+    const [isNumberView, setIsNumberView] = useState(false);
     const [landmarks, setLandmarks] = useState<Landmark[]>([]);
-    const controlsRef = useRef<OrbitControlsImpl>(null);
-    const defaultCameraPos = useRef(new Vector3(0, 0, 1.5));
-
-    const targetPosition = useRef<Vector3 | null>(null);
-    const targetLookAt = useRef<Vector3 | null>(null);
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+    const controlsRef = useRef<OrbitControlsImpl | null>(null);
+    const defaultCameraPos = useRef(new Vector3(0, 0, 0));
+    const [activeButton, setActiveButton] = useState<'up' | 'down' | 'left' | 'right' | null>(null);
 
     // 얼굴 중심 계산
     const center = useMemo(() => {
@@ -61,7 +46,6 @@ export default function FaceMeshViewer() {
 
     // Reset 버튼 클릭 시
     const resetView = () => {
-        setIndex(null);
         if (controlsRef.current) {
             controlsRef.current.object.position.copy(defaultCameraPos.current);
             controlsRef.current.target.copy(center);
@@ -69,43 +53,117 @@ export default function FaceMeshViewer() {
         }
     };
 
-    function CameraAnimator({ controlsRef, targetPosition, targetLookAt }: any) {
-        useFrame(() => {
-            if (!controlsRef.current || !targetPosition.current || !targetLookAt.current) return;
-
-            const cam = controlsRef.current.object;
-            const target = controlsRef.current.target;
-
-            // 카메라 위치 lerp
-            cam.position.lerp(targetPosition.current, 0.1);
-            target.lerp(targetLookAt.current, 0.1);
-
-            controlsRef.current.update();
-
-            // 목표 근처 도달하면 refs 초기화 → 이후 자유롭게 회전/줌
-            if (cam.position.distanceTo(targetPosition.current) < 0.01) {
-                targetPosition.current = null;
-                targetLookAt.current = null;
-            }
-        });
-
-        return null;
-    }
-
-    // highlight 선택 시 카메라 한 번만 이동
-    useEffect(() => {
-        if (index !== null && landmarks[index]) {
-            // LandmarkPoints와 같은 축 보정
-            // const scaleFix = new Vector3(1, -1, -1);
-
-            // const target = new Vector3(landmarks[index].x * scaleFix.x, landmarks[index].y * scaleFix.y, landmarks[index].z * scaleFix.z);
-
-            // const offset = new Vector3(0, 0, 0.5).multiply(scaleFix);
-
-            // targetPosition.current = target.clone().add(offset);
-            // targetLookAt.current = target.clone();
+    const numberView = () => {
+        if (!isNumberView) {
+            const numbers = Array.from({ length: 468 }, (_, i) => i);
+            setIndex(numbers);
+            setIsNumberView(true);
+        } else {
+            setIndex([]);
+            setIsNumberView(false);
         }
-    }, [index, landmarks]);
+    };
+
+    const controlsTarget = useRef(center.clone()); // 👈 추가
+    // 🟢 카메라 평행 이동 (각도 유지)
+    const moveCameraUp = () => {
+        if (!controlsRef.current) return;
+
+        const cam = controlsRef.current.object;
+        const target = controlsRef.current.target;
+
+        const delta = new Vector3(0, 0.1, 0); // Y축 이동량
+        cam.position.add(delta); // 카메라 이동
+        target.add(delta); // 타겟도 동일하게 이동
+        controlsRef.current.update();
+    };
+
+    const moveCameraDown = () => {
+        if (!controlsRef.current) return;
+
+        const cam = controlsRef.current.object;
+        const target = controlsRef.current.target;
+
+        const delta = new Vector3(0, -0.1, 0); // Y축 이동량
+        cam.position.add(delta); // 카메라 이동
+        target.add(delta); // 타겟도 동일하게 이동
+        controlsRef.current.update();
+    };
+
+    const moveCameraLeft = () => {
+        if (!controlsRef.current) return;
+
+        const cam = controlsRef.current.object;
+        const target = controlsRef.current.target;
+
+        const delta = new Vector3(-0.1, 0, 0); // X축 이동량
+        cam.position.add(delta); // 카메라 이동
+        target.add(delta); // 타겟도 동일하게 이동
+        controlsRef.current.update();
+    };
+
+    const moveCameraRight = () => {
+        if (!controlsRef.current) return;
+
+        const cam = controlsRef.current.object;
+        const target = controlsRef.current.target;
+
+        const delta = new Vector3(0.1, 0, 0); // X축 이동량
+        cam.position.add(delta); // 카메라 이동
+        target.add(delta); // 타겟도 동일하게 이동
+        controlsRef.current.update();
+    };
+
+    // 🟢 랜드마크 점 컴포넌트
+    function LandmarkPoints({ highlight, landmarks }: { highlight: number[]; landmarks: Landmark[] }) {
+        return (
+            <group scale={[1, -1, -1]}>
+                {landmarks.map((p, i) => {
+                    const isHighlighted = highlight.includes(i);
+                    return (
+                        <mesh
+                            key={i}
+                            position={[p.x, p.y, p.z]}
+                            onClick={(e) => {
+                                e.stopPropagation(); // OrbitControls 등 이벤트 버블 방지
+                                setHoveredIndex(i); // 클릭된 번호 저장
+                            }}
+                        >
+                            <sphereGeometry args={[0.01, 16, 16]} /> {/* 👈 원래 사이즈 유지 */}
+                            <meshStandardMaterial color={isHighlighted ? 'red' : 'blue'} emissive={isHighlighted ? 'red' : 'black'} />
+                            {isHighlighted && (
+                                <>
+                                    {/* 전면 숫자 */}
+                                    <Text
+                                        position={[0, 0, -0.01]} // 구 반지름만큼 앞으로
+                                        fontSize={0.01}
+                                        color="white"
+                                        anchorX="center"
+                                        anchorY="middle"
+                                        scale={[1, -1, -1]}
+                                    >
+                                        {i.toString()}
+                                    </Text>
+
+                                    {/* 후면 숫자 */}
+                                    <Text
+                                        position={[0, 0, 0.01]} // 구 반대편
+                                        fontSize={0.01}
+                                        color="white"
+                                        anchorX="center"
+                                        anchorY="middle"
+                                        scale={[-1, -1, 1]}
+                                    >
+                                        {i.toString()}
+                                    </Text>
+                                </>
+                            )}
+                        </mesh>
+                    );
+                })}
+            </group>
+        );
+    }
 
     useEffect(() => {
         if (landmarks.length === 0) return;
@@ -121,7 +179,7 @@ export default function FaceMeshViewer() {
             }
 
             const fov = 30;
-            const scale = 1;
+            const scale = 1.5;
             const distance = boundingRadius / Math.tan((fov * Math.PI) / 180 / 2) / scale;
 
             defaultCameraPos.current = new Vector3(center.x, center.y, center.z + distance);
@@ -138,12 +196,48 @@ export default function FaceMeshViewer() {
         };
     }, [landmarks, boundingRadius, center]);
 
+    // 키보드 이벤트
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            switch (e.key) {
+                case 'ArrowUp':
+                    moveCameraUp();
+                    setActiveButton('up');
+                    break;
+                case 'ArrowDown':
+                    moveCameraDown();
+                    setActiveButton('down');
+                    break;
+                case 'ArrowLeft':
+                    moveCameraLeft();
+                    setActiveButton('left');
+                    break;
+                case 'ArrowRight':
+                    moveCameraRight();
+                    setActiveButton('right');
+                    break;
+            }
+        };
+
+        const handleKeyUp = () => {
+            setActiveButton(null); // 키 뗐을 때 눌림 효과 해제
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+        };
+    }, []);
+
     // landmarks 불러오기
     useEffect(() => {
-        fetch('/landmarks.json')
+        fetch('/mediapipe_landmark_viewer/landmarks.json')
             .then((res) => res.json())
             .then((data: Landmark[]) => {
-                const offsetY = -0.7; // 위로 올릴 거리
+                const offsetY = -0.6; // 위로 올릴 거리
                 const shifted = data.map((p) => ({ ...p, y: p.y + offsetY }));
                 setLandmarks(shifted);
             });
@@ -158,23 +252,122 @@ export default function FaceMeshViewer() {
                 width: '100vw',
             }}
         >
+            {/* UI-2 */}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: 10,
+                    left: 30,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1,
+                    justifyContent: 'center',
+
+                    zIndex: 20,
+                }}
+            >
+                <Link href="https://github.com/cornpip" target="_blank" rel="noopener noreferrer" underline="hover">
+                    <Typography variant="body1" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                        @cornpip
+                    </Typography>
+                </Link>
+            </Box>
+
             {/* UI */}
             <Box
                 sx={{
+                    position: 'absolute',
+                    top: 30,
+                    left: 30,
                     display: 'flex',
-                    gap: 2,
-                    p: 2,
+                    flexDirection: 'column',
+                    gap: 1,
+                    paddingTop: 5,
                     justifyContent: 'center',
-                    alignItems: 'center',
+                    alignItems: 'start',
+                    zIndex: 10,
                 }}
             >
-                <TextField label="Point Index" variant="outlined" size="small" value={input} onChange={(e) => setInput(e.target.value)} />
-                <Button variant="contained" onClick={() => setIndex(Number(input))}>
-                    Highlight
-                </Button>
-                <Button variant="outlined" color="secondary" onClick={resetView}>
-                    Reset
-                </Button>
+                <TextField
+                    label="ex) 10, 130, 312, ...(0~467)"
+                    variant="outlined"
+                    size="medium"
+                    sx={{
+                        width: 800,
+                    }}
+                    value={input}
+                    onChange={(e) => {
+                        const value = e.target.value;
+                        setInput(value);
+
+                        const indices = value
+                            .split(',') // ,로 분리
+                            .map((s) => s.trim()) // 공백 제거
+                            .filter((s) => s !== '') // 빈 문자열 제거
+                            .map(Number) // 숫자로 변환
+                            .filter((n) => !isNaN(n)); // 숫자만 남기기
+
+                        setIndex(indices); // 배열로 저장
+                    }}
+                />
+                <Box
+                    sx={{
+                        display: 'flex',
+                        gap: 1,
+                    }}
+                >
+                    <Button variant="outlined" color="primary" onClick={resetView}>
+                        Reset Camera View
+                    </Button>
+                    <Button variant="outlined" color={isNumberView ? 'secondary' : 'primary'} onClick={numberView}>
+                        {isNumberView ? 'cancel number view' : 'show number View'}
+                    </Button>
+                </Box>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 1,
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: 'grid',
+                            gridTemplateColumns: '50px 50px 50px',
+                            gridTemplateRows: '50px 50px 50px',
+                            gap: 1,
+                        }}
+                    >
+                        {/* 위 */}
+                        <Box />
+                        <Button variant={activeButton === 'up' ? 'contained' : 'outlined'} sx={{ transition: 'none' }} onClick={moveCameraUp}>
+                            ↑
+                        </Button>
+                        <Box />
+
+                        {/* 좌, 가운데, 우 */}
+                        <Button variant={activeButton === 'left' ? 'contained' : 'outlined'} sx={{ transition: 'none' }} onClick={moveCameraLeft}>
+                            ←
+                        </Button>
+                        <Box />
+                        <Button variant={activeButton === 'right' ? 'contained' : 'outlined'} sx={{ transition: 'none' }} onClick={moveCameraRight}>
+                            →
+                        </Button>
+
+                        {/* 아래 */}
+                        <Box />
+                        <Button variant={activeButton === 'down' ? 'contained' : 'outlined'} sx={{ transition: 'none' }} onClick={moveCameraDown}>
+                            ↓
+                        </Button>
+                        <Box />
+                    </Box>
+                    <Typography>
+                        Clicked LandMark Number:{' '}
+                        <Box component="span" fontWeight="bold" color="red" fontSize="1.2rem">
+                            {hoveredIndex}
+                        </Box>
+                    </Typography>
+                </Box>
             </Box>
 
             {/* 3D Canvas */}
@@ -189,9 +382,8 @@ export default function FaceMeshViewer() {
                 <Canvas camera={{ position: [0, 0, 1.5] }}>
                     <ambientLight intensity={0.5} />
                     <directionalLight position={[0, 1, 2]} intensity={1} />
-                    <OrbitControls ref={controlsRef} target={new Vector3(center.x, center.y + 0.1, center.z)} />
+                    <OrbitControls ref={controlsRef} target={controlsTarget.current} />
                     <LandmarkPoints highlight={index} landmarks={landmarks} />
-                    <CameraAnimator controlsRef={controlsRef} targetPosition={targetPosition} targetLookAt={targetLookAt} />
                 </Canvas>
             </Box>
         </Box>
