@@ -199,6 +199,11 @@ export default function FaceMeshViewer() {
     // 키보드 이벤트
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement | null;
+            if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+                return;
+            }
+
             switch (e.key) {
                 case 'ArrowUp':
                     moveCameraUp();
@@ -286,6 +291,7 @@ export default function FaceMeshViewer() {
                     justifyContent: 'center',
                     alignItems: 'start',
                     zIndex: 10,
+                    pointerEvents: 'none',
                 }}
             >
                 <TextField
@@ -294,6 +300,7 @@ export default function FaceMeshViewer() {
                     size="medium"
                     sx={{
                         width: 800,
+                        pointerEvents: 'auto',
                     }}
                     value={input}
                     onChange={(e) => {
@@ -314,12 +321,23 @@ export default function FaceMeshViewer() {
                     sx={{
                         display: 'flex',
                         gap: 1,
+                        pointerEvents: 'auto',
                     }}
                 >
-                    <Button variant="outlined" color="primary" onClick={resetView}>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={resetView}
+                        sx={{ pointerEvents: 'auto' }}
+                    >
                         Reset Camera View
                     </Button>
-                    <Button variant="outlined" color={isNumberView ? 'secondary' : 'primary'} onClick={numberView}>
+                    <Button
+                        variant="outlined"
+                        color={isNumberView ? 'secondary' : 'primary'}
+                        onClick={numberView}
+                        sx={{ pointerEvents: 'auto' }}
+                    >
                         {isNumberView ? 'cancel number view' : 'show number View'}
                     </Button>
                 </Box>
@@ -328,6 +346,7 @@ export default function FaceMeshViewer() {
                         display: 'flex',
                         flexDirection: 'column',
                         gap: 1,
+                        pointerEvents: 'auto',
                     }}
                 >
                     <Box
@@ -336,27 +355,28 @@ export default function FaceMeshViewer() {
                             gridTemplateColumns: '50px 50px 50px',
                             gridTemplateRows: '50px 50px 50px',
                             gap: 1,
+                            pointerEvents: 'auto',
                         }}
                     >
                         {/* 위 */}
                         <Box />
-                        <Button variant={activeButton === 'up' ? 'contained' : 'outlined'} sx={{ transition: 'none' }} onClick={moveCameraUp}>
+                        <Button variant={activeButton === 'up' ? 'contained' : 'outlined'} sx={{ transition: 'none', pointerEvents: 'auto' }} onClick={moveCameraUp}>
                             ↑
                         </Button>
                         <Box />
 
                         {/* 좌, 가운데, 우 */}
-                        <Button variant={activeButton === 'left' ? 'contained' : 'outlined'} sx={{ transition: 'none' }} onClick={moveCameraLeft}>
+                        <Button variant={activeButton === 'left' ? 'contained' : 'outlined'} sx={{ transition: 'none', pointerEvents: 'auto' }} onClick={moveCameraLeft}>
                             ←
                         </Button>
                         <Box />
-                        <Button variant={activeButton === 'right' ? 'contained' : 'outlined'} sx={{ transition: 'none' }} onClick={moveCameraRight}>
+                        <Button variant={activeButton === 'right' ? 'contained' : 'outlined'} sx={{ transition: 'none', pointerEvents: 'auto' }} onClick={moveCameraRight}>
                             →
                         </Button>
 
                         {/* 아래 */}
                         <Box />
-                        <Button variant={activeButton === 'down' ? 'contained' : 'outlined'} sx={{ transition: 'none' }} onClick={moveCameraDown}>
+                        <Button variant={activeButton === 'down' ? 'contained' : 'outlined'} sx={{ transition: 'none', pointerEvents: 'auto' }} onClick={moveCameraDown}>
                             ↓
                         </Button>
                         <Box />
