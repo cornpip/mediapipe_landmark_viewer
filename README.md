@@ -30,3 +30,7 @@ Click a point to see its number.
 The landmark data used comes from the following JSON source: [link](https://github.com/lschmelzeisen/understanding-mediapipe-facemesh-output/blob/main/output/landmarks.json)
 
 Landmark numbers on a face image: [link](https://storage.googleapis.com/mediapipe-assets/documentation/mediapipe_face_landmark_fullsize.png)
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details. Copyright (c) 2024 cornpip.
