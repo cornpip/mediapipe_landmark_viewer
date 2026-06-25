@@ -1,6 +1,4 @@
-# MediaPipe Landmark 3D Viewer (Face)
-
-### **[MediaPipe Landmark 3D Viewer Link](https://cornpip.github.io/mediapipe_landmark_viewer/)**
+### **[MediaPipe Face Mesh 3D Viewer Link](https://cornpip.github.io/mediapipe_landmark_viewer/)**
 
 Interactive 3D viewer for MediaPipe Face Mesh landmarks.
 Renders each landmark with its index number so you can instantly see which point corresponds to which facial feature.
